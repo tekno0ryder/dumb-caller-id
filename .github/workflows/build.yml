@@ -27,7 +27,7 @@ jobs:
           java-version: 17
 
       # Also checks that gradle-wrapper.jar is the genuine one.
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
 
       - name: Lint, test and build
         run: ./gradlew lintDebug testDebugUnitTest assembleDebug assembleRelease
