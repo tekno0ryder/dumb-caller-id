@@ -1,11 +1,18 @@
-# Weekly pull requests for newer Gradle dependencies and GitHub Actions. CI checks each one before you merge.
+# Weekly pull requests for newer Gradle dependencies and GitHub Actions, one per ecosystem rather than one per
+# library. CI checks each before you merge. Security fixes still arrive on their own, as soon as they're known.
 version: 2
 updates:
   - package-ecosystem: gradle
     directory: /
     schedule:
       interval: weekly
+    groups:
+      gradle:
+        patterns: ["*"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]

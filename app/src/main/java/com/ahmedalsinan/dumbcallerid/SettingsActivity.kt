@@ -1,8 +1,12 @@
 package com.ahmedalsinan.dumbcallerid
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Intent
+import android.content.pm.ApplicationInfo
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -19,7 +23,6 @@ class SettingsActivity : Activity() {
     private lateinit var botStatus: TextView
     private lateinit var testStatus: TextView
     private lateinit var checklist: LinearLayout
-    private lateinit var hints: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +32,6 @@ class SettingsActivity : Activity() {
         botStatus = findViewById(R.id.botStatus)
         testStatus = findViewById(R.id.testStatus)
         checklist = findViewById(R.id.checklist)
-        hints = findViewById(R.id.hints)
 
         findViewById<View>(R.id.backButton).setOnClickListener { finish() }
         botInput.setText(Prefs.botName(this))
@@ -53,9 +55,36 @@ class SettingsActivity : Activity() {
             // Android 13+ confirms copies itself.
             if (Build.VERSION.SDK_INT < 33) Toast.makeText(this, R.string.diagnostics_copied, Toast.LENGTH_SHORT).show()
         }
+        findViewById<TextView>(R.id.sourceCodeUrl).text = getString(R.string.repo_url).removePrefix("https://")
+        findViewById<View>(R.id.sourceCode).setOnClickListener {
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.repo_url))))
+            } catch (e: ActivityNotFoundException) { // no browser
+                Toast.makeText(this, R.string.repo_url, Toast.LENGTH_LONG).show()
+            }
+        }
 
         val version = packageManager.getPackageInfo(packageName, 0).versionName.orEmpty()
-        findViewById<TextView>(R.id.version).text = getString(R.string.version, version)
+        val debug = applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+        findViewById<TextView>(R.id.version).text = getString(if (debug) R.string.version_debug else R.string.version, version)
+        findViewById<Button>(R.id.checkUpdates).setOnClickListener { checkForUpdate(it) }
+    }
+
+    // Checks right away instead of waiting for the daily check.
+    private fun checkForUpdate(button: View) {
+        button.isEnabled = false
+        val app = applicationContext
+        Thread {
+            val reached = Updates.check(app)
+            runOnUiThread {
+                button.isEnabled = true
+                when {
+                    !reached -> Toast.makeText(app, R.string.update_check_failed, Toast.LENGTH_SHORT).show()
+                    Updates.available(app) != null -> startActivity(Intent(this, MainActivity::class.java)) // its banner
+                    else -> Toast.makeText(app, R.string.update_latest, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
     }
 
     override fun onResume() {
@@ -65,7 +94,7 @@ class SettingsActivity : Activity() {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (requestCode == Setup.REQUEST_PERMISSIONS) Setup.onPermissionsResult(this)
+        Setup.onPermissionsResult(this, requestCode)
         renderChecklist()
     }
 
@@ -76,21 +105,18 @@ class SettingsActivity : Activity() {
 
     private fun renderChecklist() {
         checklist.removeAllViews()
-        for (check in Setup.checks) {
+        for ((index, check) in Setup.checks.withIndex()) {
             val ok = check.isOk(this)
             val row = layoutInflater.inflate(R.layout.check_row, checklist, false)
-            row.findViewById<ImageView>(R.id.checkIcon).setImageResource(if (ok) R.drawable.ic_check_ok else R.drawable.ic_check_missing)
+            row.findViewById<ImageView>(R.id.checkIcon).setImageResource(Setup.icon(check, this))
             row.findViewById<TextView>(R.id.checkTitle).setText(check.title)
             row.findViewById<Button>(R.id.checkFix).apply {
                 visibility = if (ok || !check.canFix(this@SettingsActivity)) View.GONE else View.VISIBLE
-                setOnClickListener { check.fix(this@SettingsActivity) }
+                // That step's setup page: why it's needed, what to do, and tips if it doesn't work.
+                setOnClickListener { startActivity(OnboardingActivity.forStep(this@SettingsActivity, index)) }
             }
             checklist.addView(row)
         }
-
-        val notes = Setup.hints(this)
-        hints.text = notes.joinToString("\n\n")
-        hints.visibility = if (notes.isEmpty()) View.GONE else View.VISIBLE
     }
 
     private companion object {

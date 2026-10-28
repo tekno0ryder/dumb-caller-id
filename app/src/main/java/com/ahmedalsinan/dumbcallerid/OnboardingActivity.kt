@@ -1,6 +1,8 @@
 package com.ahmedalsinan.dumbcallerid
 
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -8,10 +10,13 @@ import android.widget.ImageView
 import android.widget.TextView
 
 // Walks through the missing setup steps one at a time: why it's needed, what to do next, then one button to do it.
-// Opens by itself on the first launch, and from the home screen's "Needs setup" warning.
+// Opens by itself on the first launch, from the home screen's "Needs setup" warning, and for a single step from
+// its Fix button in Settings.
 class OnboardingActivity : Activity() {
     // Indexes into Setup.checks that were missing when this screen opened, so "Step 2 of 3" stays stable.
     private lateinit var steps: IntArray
+    // Opened from a Fix button in Settings: no summary page; back to Settings once done or skipped.
+    private var singleStep = false
     private val skipped = mutableSetOf<Int>()
 
     private lateinit var progress: TextView
@@ -38,7 +43,10 @@ class OnboardingActivity : Activity() {
         primary = findViewById(R.id.primary)
         skip = findViewById(R.id.skip)
 
+        val only = intent.getIntExtra(EXTRA_STEP, -1).takeIf { it in Setup.checks.indices }
+        singleStep = only != null
         steps = savedInstanceState?.getIntArray(KEY_STEPS)
+            ?: only?.let { intArrayOf(it) }
             ?: Setup.checks.indices.filter { !Setup.checks[it].isOk(this) }.toIntArray()
         savedInstanceState?.getIntArray(KEY_SKIPPED)?.let { skipped += it.toList() }
         Prefs.setOnboardingSeen(this)
@@ -58,19 +66,19 @@ class OnboardingActivity : Activity() {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (requestCode == Setup.REQUEST_PERMISSIONS) Setup.onPermissionsResult(this)
+        Setup.onPermissionsResult(this, requestCode)
         render()
     }
 
     private fun render() {
         if (!Setup.isSupported(this)) return renderUnsupported()
         val position = nextStep(steps, skipped) { Setup.checks[it].isOk(this) }
-        if (position == -1) return renderDone()
+        if (position == -1) return if (singleStep) finish() else renderDone()
 
         val check = Setup.checks[steps[position]]
         progress.text = getString(R.string.onboarding_step, position + 1, steps.size)
         progress.visibility = View.VISIBLE
-        icon.setImageResource(R.drawable.ic_check_missing)
+        icon.setImageResource(Setup.icon(check, this))
         title.setText(check.title)
         body.setText(check.why)
         next.text = getString(check.next, getString(R.string.app_name))
@@ -113,9 +121,14 @@ class OnboardingActivity : Activity() {
         skip.visibility = View.GONE
     }
 
-    private companion object {
-        const val KEY_STEPS = "steps"
-        const val KEY_SKIPPED = "skipped"
+    companion object {
+        private const val KEY_STEPS = "steps"
+        private const val KEY_SKIPPED = "skipped"
+        private const val EXTRA_STEP = "step"
+
+        // Just the step at [index] in Setup.checks.
+        fun forStep(context: Context, index: Int): Intent =
+            Intent(context, OnboardingActivity::class.java).putExtra(EXTRA_STEP, index)
     }
 }
 

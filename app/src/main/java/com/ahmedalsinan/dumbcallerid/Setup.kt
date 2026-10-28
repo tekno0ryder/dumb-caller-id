@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.NotificationManager
 import android.app.role.RoleManager
 import android.content.Context
 import android.content.Intent
@@ -21,6 +22,7 @@ import java.lang.ref.WeakReference
 object Setup {
     const val REQUEST_PERMISSIONS = 1
     const val REQUEST_ROLE = 2
+    const val REQUEST_NOTIFICATIONS = 3
 
     private val battery = BatteryUi.forSdk(Build.VERSION.SDK_INT)
 
@@ -31,7 +33,8 @@ object Setup {
 
     // A setup step: what it's for, what the user will see after tapping [action], whether it's done,
     // how to fix it, and phone-specific advice for when the fix doesn't work. A step that can't be fixed on
-    // this phone (not [canFix]) shows no Fix button.
+    // this phone (not [canFix]) shows no Fix button. An optional step (not [required]) can be left undone
+    // without the home screen asking for setup.
     class Check(
         val title: Int,
         val why: Int,
@@ -40,6 +43,7 @@ object Setup {
         val isOk: (Context) -> Boolean,
         val hint: (Context) -> String? = { null },
         val canFix: (Context) -> Boolean = { true },
+        val required: Boolean = true,
         val fix: (Activity) -> Unit,
     )
 
@@ -83,6 +87,17 @@ object Setup {
         ) {
             SettingsLauncher.openSettings(it, Intent.ACTION_AUTO_REVOKE_PERMISSIONS)
         },
+        // Optional: only used to announce updates (Updates.kt).
+        Check(
+            R.string.check_notifications, R.string.why_notifications, R.string.next_notifications, R.string.action_allow,
+            isOk = ::notificationsAllowed, required = false,
+        ) {
+            if (Build.VERSION.SDK_INT >= 33) {
+                it.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQUEST_NOTIFICATIONS)
+            } else {
+                openNotificationSettings(it)
+            }
+        },
         Check(
             R.string.check_telegram, R.string.why_telegram, R.string.next_telegram, R.string.action_install,
             isOk = Telegram::isInstalled, fix = ::openTelegramStorePage,
@@ -122,23 +137,29 @@ object Setup {
             .show())
     }
 
-    fun isComplete(context: Context): Boolean = checks.all { it.isOk(context) }
+    // Done: green. Missing: red, or grey for an optional step, since only required ones stop the popup.
+    fun icon(check: Check, context: Context): Int = when {
+        check.isOk(context) -> R.drawable.ic_check_ok
+        check.required -> R.drawable.ic_check_missing
+        else -> R.drawable.ic_check_optional
+    }
+
+    fun isComplete(context: Context): Boolean = checks.filter { it.required }.all { it.isOk(context) }
 
     // Some custom Android builds have no caller ID role; the popup can't work there at all.
     fun isSupported(context: Context): Boolean =
         context.getSystemService(RoleManager::class.java).isRoleAvailable(RoleManager.ROLE_CALL_SCREENING)
 
-    // The settings screen shows the advice for every unfinished step.
-    fun hints(context: Context): List<String> =
-        listOfNotNull(context.getString(R.string.unsupported_summary).takeUnless { isSupported(context) })
-            .plus(checks.filter { !it.isOk(context) }.mapNotNull { it.hint(context) })
-            .distinct()
-
     // Android 13+ blocks some settings for apps not installed from an app store until "Allow restricted settings"
     // is turned on. Installs from Google Play never see this.
     private fun restrictedHint(context: Context): String? {
         if (Build.VERSION.SDK_INT < 33) return null
-        val installer = context.packageManager.getInstallSourceInfo(context.packageName).installingPackageName
+        // Unknown installer (Android can't say): show the tip, as for any install outside Google Play.
+        val installer = try {
+            context.packageManager.getInstallSourceInfo(context.packageName).installingPackageName
+        } catch (e: PackageManager.NameNotFoundException) {
+            null
+        }
         if (installer == "com.android.vending") return null
         return context.getString(R.string.hint_restricted, context.getString(R.string.app_name))
     }
@@ -166,11 +187,31 @@ object Setup {
     }
 
     // After "Don't allow" twice Android stops showing the dialog; send the user to App info instead.
-    fun onPermissionsResult(activity: Activity) {
-        if (missingPermissions(activity).any { !activity.shouldShowRequestPermissionRationale(it) }) {
-            SettingsLauncher.openSettings(activity, Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+    // Same for notifications, whose switch is on the app's notification settings page.
+    fun onPermissionsResult(activity: Activity, requestCode: Int) {
+        when (requestCode) {
+            REQUEST_PERMISSIONS -> if (missingPermissions(activity).any { !activity.shouldShowRequestPermissionRationale(it) }) {
+                SettingsLauncher.openSettings(activity, Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            }
+            REQUEST_NOTIFICATIONS -> if (!notificationsAllowed(activity) &&
+                !activity.shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)
+            ) {
+                openNotificationSettings(activity)
+            }
         }
     }
+
+    // On by default below Android 13, where apps don't have to ask.
+    private fun notificationsAllowed(context: Context): Boolean =
+        context.getSystemService(NotificationManager::class.java).areNotificationsEnabled()
+
+    private fun openNotificationSettings(activity: Activity) = SettingsLauncher.startFirst(
+        activity,
+        listOf(
+            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, activity.packageName),
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${activity.packageName}")),
+        ),
+    )
 
     private fun isIgnoringBatteryOptimizations(context: Context): Boolean =
         context.getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(context.packageName)

@@ -25,12 +25,22 @@ android {
     namespace = "com.ahmedalsinan.dumbcallerid"
     compileSdk = 36
 
+    // For the update_url resource below.
+    buildFeatures {
+        resValues = true
+    }
+
     defaultConfig {
         applicationId = "com.ahmedalsinan.dumbcallerid"
         minSdk = 29
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        // Where Updates.kt looks for new versions: this repository's latest GitHub release.
+        resValue("string", "update_url", "https://api.github.com/repos/tekno0ryder/dumb-caller-id/releases/latest")
+        // scripts/try-update.sh builds a "newer" copy with these, to try updating without a real release.
+        providers.gradleProperty("tryVersionCode").orNull?.let { versionCode = it.toInt() }
+        providers.gradleProperty("tryVersionName").orNull?.let { versionName = it }
     }
 
     signingConfigs {
@@ -45,6 +55,10 @@ android {
     }
 
     buildTypes {
+        // Debug builds look for updates on this computer instead (scripts/try-update.sh), never on GitHub.
+        debug {
+            resValue("string", "update_url", "http://127.0.0.1:8765/latest.json")
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -75,7 +89,9 @@ dependencies {
     testImplementation("org.robolectric:robolectric:4.17")
 }
 
-// DeviceTest reads the manifest directly, so editing it must re-run the tests rather than reuse old results.
+// DeviceTest and UpdatesTest read these files directly, so editing them must re-run the tests rather than reuse
+// old results.
 tasks.withType<Test>().configureEach {
     inputs.file("src/main/AndroidManifest.xml")
+    inputs.file("build.gradle.kts") // UpdatesTest checks the update addresses in it
 }

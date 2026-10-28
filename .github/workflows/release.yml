@@ -1,36 +1,62 @@
-# Publishes a signed APK as a GitHub release when a version tag (v1.2) is pushed. The tag must match
-# versionName, and four repository secrets are needed. Steps: RELEASING.md.
+# Publishes a signed APK as a GitHub release whenever main has a version that isn't released yet.
+# To release: raise versionCode and versionName in app/build.gradle.kts and push to main. Pushes that keep
+# the version only run the checks in build.yml. Needs four repository secrets; see RELEASING.md.
 name: Release
 
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+  workflow_dispatch: # "Run workflow" button, e.g. to retry a failed release
 
 permissions:
-  contents: write # to create the GitHub release
+  contents: write # to create the tag and the release
+
+# One release at a time, and never cancel one halfway through.
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # all tags, to compare with the previous release
+
+      - name: Check for a new version
+        id: version
+        run: |
+          name=$(sed -n 's/^ *versionName = "\(.*\)"$/\1/p' app/build.gradle.kts)
+          code=$(sed -n 's/^ *versionCode = \([0-9][0-9]*\)$/\1/p' app/build.gradle.kts)
+          echo "tag=v$name" >> "$GITHUB_OUTPUT"
+          if git rev-parse -q --verify "refs/tags/v$name" > /dev/null; then
+            echo "v$name is already released; nothing to do."
+            echo "new=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          previous=$(git describe --tags --abbrev=0 --match 'v*' 2> /dev/null || true)
+          if [ -n "$previous" ]; then
+            previous_code=$(git show "$previous:app/build.gradle.kts" | sed -n 's/^ *versionCode = \([0-9][0-9]*\)$/\1/p')
+            if [ "$code" -le "$previous_code" ]; then
+              echo "::error::versionCode $code must be higher than $previous_code (in $previous), or phones won't install the update"
+              exit 1
+            fi
+          fi
+          echo "Releasing v$name (versionCode $code)"
+          echo "new=true" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-java@v4
+        if: steps.version.outputs.new == 'true'
         with:
           distribution: temurin
           java-version: 17
 
       - uses: gradle/actions/setup-gradle@v4
-
-      - name: Check the tag matches versionName
-        run: |
-          version=$(sed -n 's/.*versionName = "\(.*\)".*/\1/p' app/build.gradle.kts)
-          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME doesn't match versionName $version in app/build.gradle.kts"
-            exit 1
-          fi
+        if: steps.version.outputs.new == 'true'
 
       - name: Restore the signing key
+        if: steps.version.outputs.new == 'true'
         env:
           SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
         run: |
@@ -41,6 +67,7 @@ jobs:
           echo "$SIGNING_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.jks"
 
       - name: Lint, test and build signed release
+        if: steps.version.outputs.new == 'true'
         env:
           SIGNING_STORE_FILE: ${{ runner.temp }}/release.jks
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
@@ -49,13 +76,15 @@ jobs:
         run: ./gradlew lintDebug testDebugUnitTest assembleRelease
 
       - name: Publish the release
+        if: steps.version.outputs.new == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
-          apk="dumb-caller-id-$GITHUB_REF_NAME.apk"
+          apk="dumb-caller-id-$TAG.apk"
           cp app/build/outputs/apk/release/app-release.apk "$apk"
-          gh release create "$GITHUB_REF_NAME" "$apk" \
-            --title "Dumb Caller ID $GITHUB_REF_NAME" --generate-notes
+          gh release create "$TAG" "$apk" --target "$GITHUB_SHA" \
+            --title "Dumb Caller ID $TAG" --generate-notes
 
       - name: Remove the signing key
         if: always()

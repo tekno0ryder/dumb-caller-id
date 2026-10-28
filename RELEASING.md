@@ -35,15 +35,13 @@ keyPassword=…
 
 ## Publishing a version
 
-1. In `app/build.gradle.kts`, raise `versionCode` by 1 and set `versionName` (e.g. `1.2`). Android only installs an update with a higher `versionCode`.
-2. Commit, then push a tag that matches `versionName`:
-   ```sh
-   git tag v1.2 && git push origin v1.2
-   ```
-3. [release.yml](.github/workflows/release.yml) checks the tag matches, runs lint and tests, signs the APK, and publishes it as a GitHub release named `dumb-caller-id-v1.2.apk`.
+1. In `app/build.gradle.kts`, raise `versionCode` by 1 and set a new `versionName` (e.g. `1.1`). Android only installs an update with a higher `versionCode`.
+2. Commit and push to `main`.
+
+[release.yml](.github/workflows/release.yml) runs on every push to `main`. When `versionName` has no release yet, it runs lint and tests, signs the APK, tags the commit `v1.1` and publishes `dumb-caller-id-v1.1.apk` as a GitHub release. Pushes that keep the same version publish nothing. It stops with an error if `versionName` changed but `versionCode` didn't go up.
+
+If a release fails (e.g. a missing secret), fix it and push again, or use "Run workflow" on the Release workflow in the Actions tab.
 
 To build a signed APK on your machine instead: `./gradlew assembleRelease` (output in `app/build/outputs/apk/release/`).
 
-## Google Play
-
-The app is distributed as an APK, not through Google Play. If that ever changes: `./gradlew bundleRelease` builds the `.aab` Play expects, and the battery setup step's `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` permission needs reviewing first, since Play restricts it.
+Publishing on Google Play instead is covered separately in [docs/GOOGLE_PLAY.md](docs/GOOGLE_PLAY.md).

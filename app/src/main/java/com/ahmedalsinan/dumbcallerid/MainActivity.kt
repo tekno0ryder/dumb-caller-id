@@ -6,11 +6,13 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
+import android.widget.Toast
 
 // Home: is it working, and what happened on recent calls. Everything else is in SettingsActivity.
 class MainActivity : Activity() {
@@ -22,6 +24,9 @@ class MainActivity : Activity() {
     private lateinit var recentCalls: LinearLayout
     private lateinit var noCalls: View
     private lateinit var clearCalls: View
+    private lateinit var updateBanner: View
+    private lateinit var updateText: TextView
+    private lateinit var updateButton: Button
     private val callsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> renderRecentCalls() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +41,10 @@ class MainActivity : Activity() {
         recentCalls = findViewById(R.id.recentCalls)
         noCalls = findViewById(R.id.noCalls)
         clearCalls = findViewById(R.id.clearCalls)
+        updateBanner = findViewById(R.id.updateBanner)
+        updateText = findViewById(R.id.updateText)
+        updateButton = findViewById(R.id.updateButton)
+        updateButton.setOnClickListener { startUpdate() }
         clearCalls.setOnClickListener {
             AlertDialog.Builder(this)
                 .setMessage(R.string.clear_calls_confirm)
@@ -69,6 +78,36 @@ class MainActivity : Activity() {
         renderStatus()
         renderRecentCalls()
         RecentCalls.watch(this, callsListener)
+        renderUpdate()
+        Updates.checkIfStale(this) { if (!isDestroyed) renderUpdate() }
+    }
+
+    private fun renderUpdate() {
+        val release = Updates.available(this)
+        updateBanner.visibility = if (release != null) View.VISIBLE else View.GONE
+        if (release != null) updateText.text = getString(R.string.update_available, release.tag)
+        else Updates.clearNotification(this)
+    }
+
+    // Android only lets the app install updates once "Install unknown apps" is allowed for it; the first time,
+    // that settings page opens, and the user taps Update again when back.
+    private fun startUpdate() {
+        val release = Updates.available(this) ?: return
+        if (!packageManager.canRequestPackageInstalls()) {
+            SettingsLauncher.openSettings(this, Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+            return
+        }
+        updateButton.isEnabled = false
+        updateText.setText(R.string.update_downloading)
+        val app = applicationContext
+        Thread {
+            val started = Updates.install(app, release)
+            runOnUiThread {
+                if (!started) Toast.makeText(app, R.string.update_failed, Toast.LENGTH_LONG).show()
+                updateButton.isEnabled = true
+                renderUpdate()
+            }
+        }.start()
     }
 
     override fun onPause() {

@@ -43,6 +43,35 @@
                 android:src="@drawable/ic_settings" />
         </LinearLayout>
 
+        <!-- Shown when a newer release exists (Updates.kt) -->
+        <LinearLayout
+            android:id="@+id/updateBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/info_bg"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/updateText"
+                style="@style/Text.Body"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/updateButton"
+                style="@style/Button.Tonal.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="@string/update" />
+        </LinearLayout>
+
         <!-- Status: Active / Off / Needs setup -->
         <LinearLayout
             style="@style/Card"

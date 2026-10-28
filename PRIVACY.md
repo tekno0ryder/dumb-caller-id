@@ -19,6 +19,8 @@ A number is shared only when you tap **Look up**. The app then opens Telegram wi
 
 **Copy diagnostics** in Settings copies a short report to your clipboard: your phone model, Android version, which setup steps are done, and the time and result of recent calls. It contains no phone numbers. It is created only when you tap the button, and leaves your phone only if you paste it somewhere yourself.
 
+**Update checks.** Once a day, and when you open the app, it asks GitHub for the latest release of this app, so it can offer updates. The request contains nothing about you, your contacts or your calls; like any website, GitHub sees your IP address. Updates are only downloaded and installed when you tap **Update**.
+
 The app has no servers, no analytics, no ads, and no tracking. It does not send any data to the developer.
 
 ## Contact
