@@ -34,8 +34,8 @@ android {
         applicationId = "com.ahmedalsinan.dumbcallerid"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
         // Where Updates.kt looks for new versions: this repository's latest GitHub release.
         resValue("string", "update_url", "https://api.github.com/repos/tekno0ryder/dumb-caller-id/releases/latest")
         // scripts/try-update.sh builds a "newer" copy with these, to try updating without a real release.
