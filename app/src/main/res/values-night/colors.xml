@@ -1,0 +1,13 @@
+<resources>
+    <color name="background">#0E1014</color>
+    <color name="surface">#181B21</color>
+    <color name="surface_variant">#22262E</color>
+    <color name="outline">#2A2F38</color>
+    <color name="text_primary">#ECEFF4</color>
+    <color name="text_secondary">#9AA3AF</color>
+    <color name="brand_soft">#14324A</color>
+    <color name="brand_text">#6CC8F7</color>
+    <color name="success">#4ADE80</color>
+    <color name="danger">#F87171</color>
+    <color name="danger_soft">#3A1D1D</color>
+</resources>

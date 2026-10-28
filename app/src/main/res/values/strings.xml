@@ -1,0 +1,124 @@
+<resources>
+    <string name="app_name">Dumb Caller ID</string>
+
+    <!-- Main screen -->
+    <string name="tile_label">Caller popup</string>
+    <string name="settings">Settings</string>
+    <string name="back">Back</string>
+    <string name="status_active">Active</string>
+    <string name="status_off">Off</string>
+    <string name="status_unsupported">Not supported</string>
+    <string name="unsupported_summary">This phone doesn\'t let apps act as caller ID, so the popup can\'t work on it.</string>
+    <string name="status_needs_setup">Needs setup</string>
+    <string name="setup_warning">Some setup steps are missing</string>
+    <string name="section_popup">Popup</string>
+    <string name="section_help">Help</string>
+    <string name="copy_diagnostics">Copy diagnostics</string>
+    <string name="diagnostics_summary">Copies your phone model and setup status, without any phone numbers, so you can send it to whoever helps you.</string>
+    <string name="diagnostics_copied">Copied</string>
+    <string name="version">Version %1$s</string>
+    <string name="enabled">Show popup for unknown callers</string>
+    <string name="enabled_summary">Unknown numbers get a popup to look them up in Telegram.</string>
+    <string name="disabled_summary">Incoming calls are not checked.</string>
+    <string name="section_bot">Telegram bot</string>
+    <string name="bot_label">Telegram bot username</string>
+    <string name="bot_privacy">When you tap Look up, the number is sent to this bot on Telegram. The bot is run by a third party.</string>
+    <string name="bot_hint" translatable="false">dlilcomApp_bot</string>
+    <string name="at_sign" translatable="false">@</string>
+    <string name="save">Save</string>
+    <string name="test_popup">Test popup</string>
+    <string name="look_up">Look up</string>
+    <string name="setup">Setup</string>
+    <string name="fix">Fix</string>
+    <string name="saved">Saved</string>
+    <string name="test_popup_sent">Test popup sent</string>
+    <string name="test_popup_blocked">Popup not allowed: tap Fix under Setup</string>
+    <string name="invalid_bot">Invalid bot username</string>
+    <string name="recent_calls">Recent calls</string>
+    <string name="clear">Clear</string>
+    <string name="clear_calls_confirm">Clear recent calls?</string>
+    <!-- A recent call's line: time, then what happened -->
+    <string name="call_detail" translatable="false">%1$s · %2$s</string>
+    <string name="just_now">Just now</string>
+    <string name="no_calls">No calls yet</string>
+
+    <!-- Setup: each step has a title, why it's needed, and what the user will see next -->
+    <string name="check_role">Set as caller ID app</string>
+    <string name="why_role">Lets Android pass the app the number of unknown callers. Your contacts are never shared with the app.</string>
+    <string name="next_role">Choose %1$s when Android asks which caller ID app to use.</string>
+    <string name="hint_role">If no prompt appears:\n1. Open Settings → Apps → Default apps\n2. Tap Caller ID &amp; spam app\n3. Choose %1$s</string>
+    <string name="check_phone">Allow phone access</string>
+    <string name="check_overlay">Allow popup over other apps</string>
+    <string name="check_battery">Turn off battery limits</string>
+    <string name="confirm_yes">Yes, added</string>
+    <string name="confirm_not_yet">Not yet</string>
+    <string name="next_overlay_direct">Turn on Allow display over other apps, then come back.</string>
+    <string name="next_battery_dialog">Tap Allow when Android asks whether %1$s may always run in the background.</string>
+    <string name="hint_battery_page">If a settings page opens instead:</string>
+    <string name="next_battery_list">Switch the list to All apps, tap %1$s and choose Don\'t optimize. Then come back.</string>
+    <string name="next_battery_unrestricted">Choose Unrestricted, then come back. If App info opens instead, tap Battery first.</string>
+    <string name="next_battery_background">Turn on Allow background usage, then tap it and choose Unrestricted. If App info opens instead, tap App battery usage first.</string>
+    <string name="hint_battery_list">Can\'t find it? Use this path instead:\n1. Open Settings → Apps → Special app access\n2. Tap Battery optimization\n3. Switch the list to All apps\n4. Tap %1$s and choose Don\'t optimize</string>
+    <string name="hint_battery_app_info">Can\'t find it? Open Settings → Apps → %1$s → App battery usage, and choose Unrestricted under Allow background usage.</string>
+    <string name="check_xiaomi_autostart">Turn on Autostart</string>
+    <string name="why_xiaomi_autostart">Xiaomi, Redmi and POCO phones don\'t let apps start in the background unless Autostart is on.</string>
+    <string name="next_xiaomi_autostart">Find %1$s in the list and turn on Autostart, then come back.</string>
+    <string name="hint_xiaomi_autostart">If a different screen opens:\n1. Open Settings → Apps → Manage apps → %1$s\n2. Turn on Autostart</string>
+    <string name="confirm_xiaomi_autostart">Did you turn on Autostart for %1$s?</string>
+    <string name="check_xiaomi_popups">Allow pop-ups in the background</string>
+    <string name="why_xiaomi_popups">Xiaomi has its own pop-up permissions. Without them the popup never appears, even when everything else is allowed.</string>
+    <string name="next_xiaomi_popups">Allow \"Display pop-up windows while running in the background\" and \"Show on Lock screen\", then come back.</string>
+    <string name="hint_xiaomi_popups">If a different screen opens:\n1. Open Settings → Apps → Manage apps → %1$s\n2. Tap Other permissions\n3. Allow both options above</string>
+    <string name="confirm_xiaomi_popups">Did you allow both pop-up options for %1$s?</string>
+    <string name="check_oppo_background">Allow background activity</string>
+    <string name="why_oppo_background">OPPO, realme and OnePlus phones stop apps that aren\'t opened often, which can stop the popup.</string>
+    <string name="next_oppo_background">Turn on Auto launch for %1$s, then come back.</string>
+    <string name="hint_oppo_background">If a different screen opens:\n1. Open Settings → Apps → %1$s\n2. Tap Battery usage\n3. Turn on Allow background activity and Allow auto launch</string>
+    <string name="confirm_oppo_background">Did you allow %1$s to run in the background?</string>
+    <string name="check_vivo_background">Allow background pop-ups</string>
+    <string name="why_vivo_background">vivo and iQOO phones block apps from starting and showing pop-ups in the background.</string>
+    <string name="next_vivo_background">Turn on Autostart and background pop-ups for %1$s, then come back.</string>
+    <string name="hint_vivo_background">If a different screen opens:\n1. Open Settings → Apps → %1$s → Permissions\n2. Allow Autostart and Display pop-up windows in the background</string>
+    <string name="confirm_vivo_background">Did you allow background pop-ups for %1$s?</string>
+    <string name="check_huawei_launch">Allow app launch</string>
+    <string name="why_huawei_launch">Huawei and Honor phones close apps they manage automatically, which can stop the popup.</string>
+    <string name="next_huawei_launch">Find %1$s, turn off Manage automatically, then turn on Auto-launch, Secondary launch and Run in background.</string>
+    <string name="hint_huawei_launch">If a different screen opens:\n1. Open Settings → Battery → App launch\n2. Find %1$s and set it as above</string>
+    <string name="confirm_huawei_launch">Did you set %1$s to launch manually?</string>
+    <string name="check_auto_revoke">Keep permissions when unused</string>
+    <string name="check_telegram">Install Telegram</string>
+    <string name="why_phone">So the popup closes by itself when the call ends.</string>
+    <string name="why_overlay">So the caller\'s number appears on top of the call screen.</string>
+    <string name="why_battery">So Android doesn\'t put the app to sleep and miss calls.</string>
+    <string name="why_auto_revoke">So Android doesn\'t remove these permissions if you don\'t open the app for a few months.</string>
+    <string name="why_telegram">Numbers are looked up through a Telegram bot.</string>
+    <string name="next_phone">Tap Allow when Android asks.</string>
+    <string name="next_overlay">Find %1$s in the list and turn it on, then come back.</string>
+    <string name="next_auto_revoke">Turn off \"Pause app activity if unused\", then come back.</string>
+    <string name="next_telegram">Install Telegram from the store, then come back.</string>
+    <string name="action_allow">Allow</string>
+    <string name="action_open_settings">Open settings</string>
+    <string name="action_install">Install Telegram</string>
+    <string name="not_working">Not working?</string>
+    <string name="hint_restricted">Android may block this as a \"Restricted setting\". To allow it:\n1. Open Settings → Apps → %1$s\n2. Tap ⋮ in the top corner\n3. Tap Allow restricted settings\n4. Come back and try again</string>
+    <string name="onboarding_step">Step %1$d of %2$d</string>
+    <string name="onboarding_skip">Skip for now</string>
+    <string name="onboarding_done">All set</string>
+    <string name="onboarding_done_body">Unknown callers will now get a popup to look them up in Telegram.</string>
+    <string name="onboarding_later">Almost there</string>
+    <string name="onboarding_later_body">Some steps were skipped. Tap Fix on the home screen when you\'re ready.</string>
+    <string name="onboarding_finish">Done</string>
+
+    <!-- Last call outcomes -->
+    <string name="outcome_no_number">hidden number</string>
+    <string name="outcome_disabled">skipped: turned off</string>
+    <string name="outcome_popup">popup shown</string>
+    <string name="outcome_popup_blocked">not shown: popup not allowed</string>
+    <string name="no_number">no number</string>
+
+    <!-- Incoming call popup -->
+    <string name="overlay_label">Incoming call</string>
+    <string name="close">Close</string>
+    <string name="open_failed">Couldn\'t open settings. Open them from the Settings app instead.</string>
+    <string name="telegram_missing">Telegram is not installed</string>
+</resources>

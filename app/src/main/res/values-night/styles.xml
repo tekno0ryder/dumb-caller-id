@@ -1,0 +1,4 @@
+<resources>
+    <!-- Only the parent changes at night; AppTheme itself lives in values/styles.xml. -->
+    <style name="Base.AppTheme" parent="android:Theme.Material.NoActionBar" />
+</resources>

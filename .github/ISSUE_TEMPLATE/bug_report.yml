@@ -1,0 +1,19 @@
+name: Bug report
+description: The popup didn't appear, setup is stuck, or something else went wrong.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: In the app, open Settings → "Copy diagnostics" and paste it here. It contains no phone numbers.
+      render: text
+    validations:
+      required: true

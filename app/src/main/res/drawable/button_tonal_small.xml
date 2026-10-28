@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The small tonal button's look (36dp tall) inside a 48dp tap area, Android's minimum touch target. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/button_tonal"
+    android:insetBottom="6dp"
+    android:insetTop="6dp" />

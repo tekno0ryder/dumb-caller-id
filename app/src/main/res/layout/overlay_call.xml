@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The outer frame gives the card its margins inside the full-width window. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="12dp"
+    android:paddingTop="8dp">
+
+    <LinearLayout
+        android:id="@+id/overlayCard"
+        tools:ignore="UselessParent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/overlay_bg"
+        android:elevation="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <!-- At the opposite end from Look up, so a hurried tap on one doesn't hit the other. -->
+        <ImageView
+            android:id="@+id/overlayClose"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="4dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/close"
+            android:padding="12dp"
+            android:src="@drawable/ic_close" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- The app icon beside the label, so the popup is recognisable over the call screen. -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawablePadding="6dp"
+                android:gravity="center_vertical"
+                android:text="@string/overlay_label"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:drawableStart="@drawable/ic_app_small" />
+
+            <!-- Shrinks to fit rather than breaking the number across lines (large font settings, narrow screens). -->
+            <TextView
+                android:id="@+id/overlayNumber"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:autoSizeMaxTextSize="20sp"
+                android:autoSizeMinTextSize="12sp"
+                android:autoSizeTextType="uniform"
+                android:maxLines="1"
+                android:textColor="@color/text_primary"
+                android:textAlignment="viewStart"
+                android:textDirection="ltr"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/overlayLookup"
+            android:layout_marginStart="12dp"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:background="@drawable/button_primary"
+            android:gravity="center"
+            android:paddingHorizontal="20dp"
+            android:text="@string/look_up"
+            android:textColor="@color/on_brand"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium" />
+
+    </LinearLayout>
+</FrameLayout>

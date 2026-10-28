@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lint warnings fail the build (see build.gradle.kts); these are the accepted exceptions. -->
+<lint>
+    <!-- "A newer version is available" notices: upgrades are deliberate, not build failures. -->
+    <issue id="OldTargetApi" severity="ignore" />
+    <issue id="GradleDependency" severity="ignore" />
+    <issue id="AndroidGradlePluginVersion" severity="ignore" />
+    <issue id="NewerVersionAvailable" severity="ignore" />
+
+    <!-- The one-tap battery dialog is deliberate: the popup must survive battery limits. Fine for an APK shared
+         directly; reconsider before publishing on Google Play, which restricts it. -->
+    <issue id="BatteryLife" severity="ignore" />
+
+    <!-- localeConfig is meant to be ignored below Android 13. -->
+    <issue id="UnusedAttribute">
+        <ignore regexp="localeConfig" />
+    </issue>
+
+    <!-- The baby face is drawn rarely (launcher, quick settings tile), so its long path costs nothing. -->
+    <issue id="VectorPath">
+        <ignore path="src/main/res/drawable/ic_launcher_foreground.xml" />
+        <ignore path="src/main/res/drawable/ic_tile.xml" />
+    </issue>
+</lint>
