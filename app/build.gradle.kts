@@ -86,7 +86,7 @@ android {
 
 dependencies {
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.robolectric:robolectric:4.17")
+    testImplementation("org.robolectric:robolectric:4.18")
 }
 
 // DeviceTest and UpdatesTest read these files directly, so editing them must re-run the tests rather than reuse
